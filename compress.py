@@ -29,7 +29,7 @@ print(f"Compressing {human(len(raw))} ...")
 # Compress with lzma
 # Preset levels: 0-9, where 9 is maximum compression
 # FORM_RAW for raw stream (no header overhead)
-compressed = lzma.compress(raw, format=lzma.FORMAT_RAW, filters=[{"id": lzma.FILTER_LZMA2, "level": 9}])
+compressed = lzma.compress(raw, preset=9)
 
 print("Decompressing ...")
 recovered = lzma.decompress(compressed)
