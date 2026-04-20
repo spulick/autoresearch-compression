@@ -1,10 +1,11 @@
 import os
 import sys
-import lzma # Import lzma for standard compression benchmarking
+import lzma
 import zlib
+import bz2 # Import bz2 for standard compression benchmarking
 
 # The original LZ78 logic is preserved but encapsulated for comparison purposes,
-# though our primary focus shifts to leveraging optimized stdlib codecs like lzma and zlib.
+# though our primary focus shifts to leveraging optimized stdlib codecs like lzma and bz2.
 
 def lz78_compress(data: bytes) -> list[tuple[int, int]]:
     dictionary = {}
@@ -29,12 +30,10 @@ def lz78_decompress(tokens: list[tuple[int, int]]) -> bytes:
     result = bytearray()
     for idx, byte in tokens:
         entry = dictionary.get(idx) + bytes([byte]) if idx in dictionary else None
-        if entry is not None: # Added safety check for malformed token lists
+        if entry is not None:
             result += entry
+            # Ensure dictionary size increases correctly for the next potential token
             dictionary[len(dictionary)] = entry
-
-    # Note: The original lz78_decompress assumed the index was always valid.
-    # This basic rewrite keeps structure but acknowledges limitations compared to real codecs.
     return bytes(result)
 
 def estimate_compressed_size(tokens: list[tuple[int, int]]) -> int:
@@ -54,7 +53,7 @@ def human(n: int) -> str:
         n /= 1024
     return f"{n:.1f} TB"
 
-def run_compression_experiment(raw: bytes) -> tuple[float, int]:
+def run_compression_experiment(raw: bytes) -> tuple[float, int, str]:
     """
     Runs several compression algorithms on the raw data and returns the best
     bpb and the corresponding compressed size in bytes. This function is
@@ -93,7 +92,6 @@ def run_compression_experiment(raw: bytes) -> tuple[float, int]:
         recovered_zlib = zlib.decompress(zlib_compressed)
         if recovered_zlib == raw:
             bpb_zlib = (len(zlib_compressed) * 8) / len(raw)
-            # We use <= to prefer the algorithm encountered first if bpb is identical, but here we just check strict improvement.
             if bpb_zlib < best_bpb:
                 best_bpb = bpb_zlib
                 best_size = len(zlib_compressed)
@@ -101,6 +99,20 @@ def run_compression_experiment(raw: bytes) -> tuple[float, int]:
     except Exception as e:
         print(f"[Warning] zlib compression failed: {e}")
 
+    # --- bz2 Compression (Standard Library Benchmark) ---
+    try:
+        bz2_compressed = bz2.compress(raw)
+        recovered_bz2 = bz2.decompress(bz2_compressed)
+        if recovered_bz2 == raw:
+            bpb_bz2 = (len(bz2_compressed) * 8) / len(raw)
+            if bpb_bz2 < best_bpb:
+                best_bpb = bpb_bz2
+                best_size = len(bz2_compressed)
+                best_method = "BZ2"
+    except Exception as e:
+        print(f"[Warning] bz2 compression failed: {e}")
+
+    # GUARANTEED RETURN VALUE FOR STABILITY
     return best_bpb, best_size, best_method
 
 
