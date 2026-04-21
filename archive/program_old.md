@@ -9,11 +9,9 @@ Lower bpb is strictly better. The metric is printed as:
 val_bpb: X.XXXX
 ```
 
-Use machine learning methods to try to improve compression. compress.py is a script with the current benchmark. 2.174 bits per byte (bpb), representing a compression ratio of 0.216. The aim is to reduce the bpb below 0.8 (a compression ratio that's below 0.1). 
+Try novel approaches to building token subsets and prediction systems. 
 
-Read the log file at 2026-04-20-203643-gemma4-logs.txt to understand what failed. Do not try the same methods again. 
-
-Use online resources to research compression only after studying the attached matt-mahoney-dce.md book.
+The agent reads this line. Do not change its format.
 
 ## Baselines (for orientation)
 
@@ -127,8 +125,6 @@ Keep a running log of results in `results.md` (the agent creates and updates thi
 
 ## The goal, restated simply
 
-Keep running experiments on the compress.py. If the new script does not beat the current benchmark, revert and try a new approach. Commit every time the new compression ratio is better than the old one. Every kept commit should move `val_bpb` down. 
-
-Nothing else matters.
+Keep running experiments on the compress.py. If the new script does not beat the current benchmark, revert and try a new approach. Commit every time the new compression ratio is better than the old one. Every kept commit should move `val_bpb` down. Nothing else matters.
 
 You are allowed to browse the internet. You are allowed to read and write compress.py within this directory. You are allowed to create new files within this directory. You are allowed to use git commands. 
